@@ -3,12 +3,36 @@ class Game
     @code = Code.new
     @computer = Computer.new
     @player = Player.new
+
+    start_game
+  end
+
+  def start_game
+    # TODO: choose codemaker/breaker
+    @code.secret = @computer.create_code
+  end
+
+  def player_guess
+    print "Guess: "
+    guess = gets.chomp
+    if code.check_guess(guess)
+      puts "You won!"
+    else
+      draw_matches
+    end
+  end
+
+  def draw_matches
+    output = []
+    code.full_matches.times { output << "X" }
+    code.partial_matches.times { output << "O" }
+    puts output.join(" ")
   end
 
   class Computer
     attr_reader :maker
 
-    def initialize(maker_switch)
+    def initialize(maker_switch = true)
       @maker_bot = maker_switch
     end
 
@@ -53,6 +77,8 @@ class Game
   end
 
   class Player
-
+    def initialize
+      @turns = 12
+    end
   end
 end
