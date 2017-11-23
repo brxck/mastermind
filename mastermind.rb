@@ -3,34 +3,31 @@ class Game
     @code = Code.new
     @computer = Computer.new
     @player = Player.new
-    @game_over = false
+    @maker_bot = true
+    @turns = 12
   end
 
-  def start
-    # TODO: choose codemaker/breaker
+  def play
     @code.secret = @computer.create_code
-    player_guess until @game_over || @player.turns.zero?
-  end
-
-  def player_guess
-    puts "Guess:"
-    guess = gets.chomp
-    if @code.check_guess(guess) == true
-      puts "You won! It was #{@code.secret}"
-      @game_over = true
-    elsif @player.turns.zero?
-      puts "You lost!"
-      @game_over = true
-    else
-      draw_matches
+    loop do
+      guess = @maker_bot ? @player.guess : @computer.guess
+      if @code.check(guess) == true
+        win
+        break
+      elsif @turns.zero?
+        lose
+        break
+      end
+      @code.draw_matches
     end
   end
 
-  def draw_matches
-    output = []
-    @code.full_matches.times { output << "X" }
-    @code.partial_matches.times { output << "O" }
-    puts output.join(" ")
+  def win
+    puts "You won! It was #{@code.secret}."
+  end
+
+  def lose
+    puts "You lost!"
   end
 
   class Computer
@@ -45,22 +42,28 @@ class Game
       4.times { secret += rand(1..6).to_s }
       secret
     end
+
+    def guess
+      guess = ""
+      4.times { guess += rand(1..6).to_s }
+      guess
+    end
   end
 
   class Code
     attr_reader :full_matches, :partial_matches, :secret
-     def initialize
+    def initialize
       @full_matches = 0
       @partial_matches = 0
     end
- 
+
     def secret=(secret)
       @secret = @secret if @secret # Don't allow secret to be changed
       secret = secret.to_s
       @secret = secret if /[1-6]{4}/.match(secret) && secret.length == 4
     end
 
-    def check_guess(guess)
+    def check(guess)
       if guess == @secret
         true
       else
@@ -78,16 +81,22 @@ class Game
         end
       end
     end
+
+    def draw_matches
+      output = []
+      @full_matches.times { output << "X" }
+      @partial_matches.times { output << "O" }
+      puts output.join(" ")
+    end
   end
 
   class Player
-    attr_reader :turns
-    
-    def initialize
-      @turns = 12
+    def guess
+      puts "Guess four digits:"
+      gets.chomp[0..3]
     end
   end
 end
 
 game = Game.new
-game.start
+game.play
