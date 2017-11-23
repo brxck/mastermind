@@ -3,20 +3,24 @@ class Game
     @code = Code.new
     @computer = Computer.new
     @player = Player.new
-
-    start_game
+    @game_over = false
   end
 
-  def start_game
+  def start
     # TODO: choose codemaker/breaker
     @code.secret = @computer.create_code
+    player_guess until @game_over || @player.turns.zero?
   end
 
   def player_guess
-    print "Guess: "
+    puts "Guess:"
     guess = gets.chomp
-    if code.check_guess(guess)
-      puts "You won!"
+    if @code.check_guess(guess) == true
+      puts "You won! It was #{@code.secret}"
+      @game_over = true
+    elsif @player.turns.zero?
+      puts "You lost!"
+      @game_over = true
     else
       draw_matches
     end
@@ -24,8 +28,8 @@ class Game
 
   def draw_matches
     output = []
-    code.full_matches.times { output << "X" }
-    code.partial_matches.times { output << "O" }
+    @code.full_matches.times { output << "X" }
+    @code.partial_matches.times { output << "O" }
     puts output.join(" ")
   end
 
@@ -44,18 +48,18 @@ class Game
   end
 
   class Code
-    attr_reader :full_matches, :partial_matches
+    attr_reader :full_matches, :partial_matches, :secret
      def initialize
       @full_matches = 0
       @partial_matches = 0
     end
-  
+ 
     def secret=(secret)
       @secret = @secret if @secret # Don't allow secret to be changed
       secret = secret.to_s
-      @secret = secret if /\[1-6]{4}/.match(secret) && secret.length == 4
+      @secret = secret if /[1-6]{4}/.match(secret) && secret.length == 4
     end
-  
+
     def check_guess(guess)
       if guess == @secret
         true
@@ -63,7 +67,7 @@ class Game
         find_matches(guess)
       end
     end
-  
+
     def find_matches(guess)
       @full_matches = @partial_matches = 0
       unmatched = @secret.split("")
@@ -77,8 +81,13 @@ class Game
   end
 
   class Player
+    attr_reader :turns
+    
     def initialize
       @turns = 12
     end
   end
 end
+
+game = Game.new
+game.start
