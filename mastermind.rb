@@ -7,17 +7,36 @@ class Game
     @turns = 12
   end
 
+  def start
+    choose_role
+    play ? win : lose
+  end
+
+  def choose_role
+    puts "Will you be the (1) Codebreaker? or the (2) Codemaker?"
+    input = gets.chomp
+    if input == "1"
+      @maker_bot = true
+      @code.secret = @computer.create_secret
+    elsif input == "2"
+      @maker_bot = false
+      loop do
+        @code.secret = @player.prompt
+        break if @code.secret
+      end
+      puts "Code is #{@code.secret}"
+    end
+  end
+
   def play
-    @code.secret = @computer.create_code
     loop do
       guess = @maker_bot ? @player.guess : @computer.guess
       if @code.check(guess) == true
-        win
-        break
+        return true
       elsif @turns.zero?
-        lose
-        break
+        return false
       end
+      @turns -= 1
       @code.draw_matches
     end
   end
@@ -37,7 +56,7 @@ class Game
       @maker_bot = maker_switch
     end
 
-    def create_code
+    def create_secret
       secret = ""
       4.times { secret += rand(1..6).to_s }
       secret
@@ -52,15 +71,17 @@ class Game
 
   class Code
     attr_reader :full_matches, :partial_matches, :secret
+
     def initialize
       @full_matches = 0
       @partial_matches = 0
     end
 
     def secret=(secret)
-      @secret = @secret if @secret # Don't allow secret to be changed
       secret = secret.to_s
-      @secret = secret if /[1-6]{4}/.match(secret) && secret.length == 4
+      if !@secret && /[1-6]{4}/.match(secret) && secret.length == 4
+        @secret = secret.to_s
+      end
     end
 
     def check(guess)
@@ -95,8 +116,15 @@ class Game
       puts "Guess four digits:"
       gets.chomp[0..3]
     end
+
+    def prompt
+      puts "Input four-digit secret code."
+      gets.chomp
+    end
   end
 end
 
-game = Game.new
-game.play
+loop do
+  game = Game.new
+  game.start
+end
