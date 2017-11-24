@@ -1,3 +1,5 @@
+# TODO: add AI
+
 class Game
   def initialize
     @code = Code.new
