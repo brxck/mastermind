@@ -2,9 +2,11 @@
 
 This is a solution for the [The Odin Project: OOP.](https://www.theodinproject.com/courses/ruby-programming/lessons/oop)
 
+Commandline implementation of the board game [Mastermind.](https://www.wikiwand.com/en/Mastermind_(board_game))
+
 ## Usage
 
-```bash
+```
 $ ruby mastermind.rb
 Will you be the (1) Codebreaker? or the (2) Codemaker?
 > 1
